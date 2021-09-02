@@ -8,7 +8,7 @@ SECRETS_LIST=""
 ROUTE_OVERRIDE=""
 
 # Preparing the secret variables defined using the prefix "SECRET_".
-SECRETS=$(env | grep ^SECRET_ | sed 's/'SECRET_'//g')
+SECRETS=$(env | grep ^SECRET_ | sed 's/^'SECRET_'//g')
 for path in ${SECRETS}
 do
   SECRETS_LIST="$SECRETS_LIST --set secrets.$path"
