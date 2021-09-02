@@ -1,0 +1,30 @@
+name: 'Trybe EKS Deploy'
+author: 'Trybe'
+description: 'Esta GitHub Action é utilizada para fazer deploy de aplicações em Elastic Kubernetes Service (EKS).'
+inputs:
+  clusterName:
+    description: 'Nome do cluster EKS aonde será realizado o deploy.'
+    required: true
+  awsRegion:
+    description: 'Região da AWS do cluster EKS.'
+    required: true
+  timeout:
+    required: false
+    description: 'Tempo em segundos para esperar pelo health check da aplicação responder.'
+    default: "120s"
+  prewiewAppRoute:
+    required: false
+    description: 'Regra de rota para usar em preview apps.'
+    default: "$REPOSITORY-preview-app-$VERSION.betrybe.dev"
+
+runs:
+  using: 'composite'
+  steps:
+    - id: job
+      shell: bash
+      run: ${{ github.action_path }}/deploy.sh
+      env:
+        EKS_CLUSTER: ${{ inputs.clusterName }}
+        AWS_REGION: ${{ inputs.awsRegion }}
+        TIMEOUT: ${{ inputs.timeout }}
+        PREVIEW_APP_ROUTE: ${{ inputs.prewiewAppRoute }}
