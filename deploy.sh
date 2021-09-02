@@ -15,14 +15,14 @@ do
 done
 
 # Defining fields according to their release type.
-if [[ "$TAG" == preview-app-* ]]; then
+if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   # Release type: Preview Apps
   RELEASE_NAME="$REPOSITORY-$VERSION"
   NAMESPACE="$REPOSITORY-preview-apps"
   VALUES_FILE="chart/values-preview-apps.yaml"
   ROUTE_OVERRIDE="--set ingressRoute.routes[0].match=\"Host(\`$PREVIEW_APP_ROUTE\`)\""
 
-elif [[ "$TAG" == "staging" ]]; then
+elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
   RELEASE_NAME="$REPOSITORY"
   NAMESPACE="$REPOSITORY"
@@ -44,7 +44,7 @@ helm upgrade $RELEASE_NAME $CHART_FILE     \
     --timeout $TIMEOUT                     \
     --values $VALUES_FILE                  \
     --set image.repository=$REPOSITORY_URI \
-    --set image.tag=$TAG                   \
+    --set image.tag=$IMAGE_TAG             \
     $ROUTE_OVERRIDE                        \
     $SECRETS_LIST
 

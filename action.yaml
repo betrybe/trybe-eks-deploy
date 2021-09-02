@@ -12,7 +12,7 @@ inputs:
     required: false
     description: 'Tempo em segundos para esperar pelo health check da aplicação responder.'
     default: "120s"
-  prewiewAppRoute:
+  previewAppRoute:
     required: false
     description: 'Regra de rota para usar em preview apps.'
     default: "$REPOSITORY-preview-app-$VERSION.betrybe.dev"
@@ -27,4 +27,4 @@ runs:
         EKS_CLUSTER: ${{ inputs.clusterName }}
         AWS_REGION: ${{ inputs.awsRegion }}
         TIMEOUT: ${{ inputs.timeout }}
-        PREVIEW_APP_ROUTE: ${{ inputs.prewiewAppRoute }}
+        PREVIEW_APP_ROUTE: ${{ inputs.previewAppRoute }}

@@ -11,5 +11,5 @@ Esta GitHub Action é utilizada para fazer deploy de aplicações em Elastic Kub
     clusterName: ${{ secrets.EKS_CLUSTER_STAGING }}  # obrigatório
     awsRegion: ${{ secrets.EKS_REGION }}  # obrigatório
     timeout: 120s  # opcional
-    prewiewAppRoute: $REPOSITORY-preview-app-$VERSION.betrybe.dev # opcional
+    previewAppRoute: $REPOSITORY-preview-app-$VERSION.betrybe.dev # opcional
 ```
