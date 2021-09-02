@@ -27,6 +27,7 @@ elif [[ "$IMAGE_TAG" == "staging" ]]; then
   RELEASE_NAME="$REPOSITORY"
   NAMESPACE="$REPOSITORY"
   VALUES_FILE="chart/values-staging.yaml"
+  CHART_FILE="chart/"
 
 else
   # Release type: Production
