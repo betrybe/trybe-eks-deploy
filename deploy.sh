@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set +x
 
 echo "Logging to EKS..."
 aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
