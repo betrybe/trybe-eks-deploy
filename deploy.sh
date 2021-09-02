@@ -2,7 +2,7 @@
 set -e
 
 echo "Logging to EKS..."
-#aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
+aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 
 SECRETS_LIST=""
 ROUTE_OVERRIDE=""
