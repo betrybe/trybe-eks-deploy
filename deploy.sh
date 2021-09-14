@@ -21,7 +21,14 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   RELEASE_NAME="$REPOSITORY-$VERSION"
   NAMESPACE="$REPOSITORY-preview-apps"
   VALUES_FILE="chart/values-preview-apps.yaml"
-  PREVIEW_APP_ROUTE=`echo $PREVIEW_APP_ROUTE | envsubst` # Resolve envs on string
+
+  # Override preview app hostname?
+  if [[ "$PREVIEW_APP_HOSTNAME" != "" ]]; then
+    PREVIEW_APP_ROUTE=$PREVIEW_APP_HOSTNAME
+  else
+    PREVIEW_APP_ROUTE=`echo $PREVIEW_APP_ROUTE | envsubst` # Resolve envs on string
+  fi
+
   ROUTE_OVERRIDE="--set ingressRoute.routes[0].match=\"Host(\`$PREVIEW_APP_ROUTE\`)\""
 
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
