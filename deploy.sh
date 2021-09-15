@@ -22,14 +22,15 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   NAMESPACE="$REPOSITORY-preview-apps"
   VALUES_FILE="chart/values-preview-apps.yaml"
 
-  # Override preview app hostname?
-  if [[ "$PREVIEW_APP_HOSTNAME" != "" ]]; then
-    PREVIEW_APP_ROUTE=$PREVIEW_APP_HOSTNAME
-  else
-    PREVIEW_APP_ROUTE=`echo $PREVIEW_APP_ROUTE | envsubst` # Resolve envs on string
-  fi
-
-  ROUTE_OVERRIDE="--set ingressRoute.routes[0].match=\"Host(\`$PREVIEW_APP_ROUTE\`)\""
+  # Use value from ENV or from user input.
+  PREVIEW_APP_HOSTNAME=${PREVIEW_APP_HOSTNAME:-$PREVIEW_APP_ROUTE}
+  index=0
+  for route in ${PREVIEW_APP_HOSTNAME}
+  do
+    host=`echo $route | envsubst` # Resolve environment variables on string
+    ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set ingressRoute.routes[$index].match=\"Host(\`$host\`)\" "
+    index=`expr $index + 1`
+  done
 
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
