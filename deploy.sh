@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set +x
 
 echo "Logging to EKS..."
 aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
@@ -9,10 +8,11 @@ SECRETS_LIST=""
 ROUTE_OVERRIDE=""
 
 # Preparing the secret variables defined using the prefix "SECRET_".
-SECRETS=$(env | grep ^SECRET_ | sed 's/^'SECRET_'//g')
-for path in ${SECRETS}
+SECRETS=$(env | awk -F = '/^SECRET_/ {print $1}')
+for data in ${SECRETS}
 do
-  SECRETS_LIST="$SECRETS_LIST --set secrets.$path"
+  NAME=$(echo $data | sed 's/'^SECRET_'//g')
+  SECRETS_LIST="$SECRETS_LIST --set secrets.$NAME=\"\${$data}\""
 done
 
 # Defining fields according to their release type.
@@ -49,7 +49,8 @@ fi
 COMMON_ARGS="--install --create-namespace --atomic --cleanup-on-fail --debug"
 
 echo "Starting deploy..."
-helm upgrade $RELEASE_NAME $CHART_FILE     \
+bash -c "\
+    helm upgrade $RELEASE_NAME $CHART_FILE \
     $COMMON_ARGS                           \
     --namespace $NAMESPACE                 \
     --timeout $TIMEOUT                     \
@@ -57,6 +58,6 @@ helm upgrade $RELEASE_NAME $CHART_FILE     \
     --set image.repository=$REPOSITORY_URI \
     --set image.tag=$IMAGE_TAG             \
     $ROUTE_OVERRIDE                        \
-    $SECRETS_LIST
-
+    $SECRETS_LIST                          \
+"
 echo "Success!"
