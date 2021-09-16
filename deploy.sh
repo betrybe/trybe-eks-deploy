@@ -9,10 +9,10 @@ SECRETS_LIST=""
 ROUTE_OVERRIDE=""
 
 # Preparing the secret variables defined using the prefix "SECRET_".
-SECRETS=$(env | sed -n 's/\('SECRET_'.*\)=.*/\1/p')
+SECRETS=$(env | awk -F = '/^SECRET_/ {print $1}')
 for data in ${SECRETS}
 do
-  NAME=$(echo $data | sed 's/'SECRET_'//g')
+  NAME=$(echo $data | sed 's/'^SECRET_'//g')
   SECRETS_LIST="$SECRETS_LIST --set secrets.$NAME=\"\${$data}\""
 done
 
