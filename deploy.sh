@@ -29,7 +29,7 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   for route in ${PREVIEW_APP_HOSTNAME}
   do
     host=`echo $route | envsubst` # Resolve environment variables on string
-    ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set ingressRoute.routes[$index].match=\"Host(\`$host\`)\" "
+    ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set ingressRoute.routes[$index].match=\"Host(\\\`$host\\\`)\" "
     index=`expr $index + 1`
   done
 
