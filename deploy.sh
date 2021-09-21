@@ -31,6 +31,7 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
     ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set ingressRoute.routes[$index].match=\"Host(\\\`$host\\\`)\" "
     index=`expr $index + 1`
   done
+  ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set appHost=$host "
 
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
