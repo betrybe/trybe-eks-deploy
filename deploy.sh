@@ -34,6 +34,7 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set appHost=$host "
   
   # Reset env variable for post-deploy use.
+  PREVIEW_APP_HOSTNAME=`echo $PREVIEW_APP_HOSTNAME | envsubst`
   echo "PREVIEW_APP_HOSTNAME=$PREVIEW_APP_HOSTNAME" >> $GITHUB_ENV
 
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
