@@ -11,7 +11,7 @@ inputs:
   timeout:
     required: false
     description: 'Tempo em segundos para esperar pelo health check da aplicação responder.'
-    default: "120s"
+    default: "300s"
   previewAppRoute:
     required: false
     description: 'Regra de rota para usar em preview apps.'
