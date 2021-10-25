@@ -19,7 +19,7 @@ done
 if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   # Release type: Preview Apps
   RELEASE_NAME="$REPOSITORY-$VERSION"
-  NAMESPACE="$REPOSITORY-preview-apps"
+  NAMESPACE=${NAMESPACE:-"$REPOSITORY-preview-apps"}
   VALUES_FILE="chart/values-preview-apps.yaml"
 
   # Use value from ENV or from user input.
@@ -40,14 +40,14 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
   RELEASE_NAME="$REPOSITORY"
-  NAMESPACE="$REPOSITORY"
+  NAMESPACE=${NAMESPACE:-"$REPOSITORY"}
   VALUES_FILE="chart/values-staging.yaml"
   CHART_FILE="chart/"
 
 else
   # Release type: Production
   RELEASE_NAME="$REPOSITORY"
-  NAMESPACE="$REPOSITORY"
+  NAMESPACE=${NAMESPACE:-"$REPOSITORY"}
   VALUES_FILE="chart/values-production.yaml"
 fi
 
