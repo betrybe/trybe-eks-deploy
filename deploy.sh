@@ -44,6 +44,13 @@ elif [[ "$IMAGE_TAG" == "staging" ]]; then
   VALUES_FILE="chart/values-staging.yaml"
   CHART_FILE="chart/"
 
+elif [[ "$IMAGE_TAG" == "homologation" ]]; then
+  # Release type: Homologation
+  RELEASE_NAME="$REPOSITORY"
+  NAMESPACE=${NAMESPACE:-"$REPOSITORY-homologation"}
+  VALUES_FILE="chart/values-homologation.yaml"
+  CHART_FILE="chart/"
+
 else
   # Release type: Production
   RELEASE_NAME="$REPOSITORY"
