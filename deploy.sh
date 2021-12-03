@@ -37,6 +37,9 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   PREVIEW_APP_HOSTNAME=`echo $PREVIEW_APP_HOSTNAME | envsubst`
   echo "PREVIEW_APP_HOSTNAME=$PREVIEW_APP_HOSTNAME" >> $GITHUB_ENV
 
+  # Cleanup any preview-app in progress
+  helm uninstall $RELEASE_NAME --wait --namespace $NAMESPACE || true
+
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
   RELEASE_NAME="$REPOSITORY"
