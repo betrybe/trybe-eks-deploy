@@ -16,6 +16,10 @@ inputs:
     required: false
     description: 'Regra de rota para usar em preview apps.'
     default: "$REPOSITORY-preview-app-$VERSION.betrybe.dev"
+  prefixDir:
+    description: 'Subdiretório do projeto, usado em para pegar path dos charts.'
+    required: true
+    default: './'
 
 runs:
   using: 'composite'
@@ -28,3 +32,4 @@ runs:
         AWS_REGION: ${{ inputs.awsRegion }}
         TIMEOUT: ${{ inputs.timeout }}
         PREVIEW_APP_ROUTE: ${{ inputs.previewAppRoute }}
+        PREFIX_DIR: ${{ inputs.prefixDir }}

@@ -20,7 +20,7 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   # Release type: Preview Apps
   RELEASE_NAME="$REPOSITORY-$VERSION"
   NAMESPACE=${NAMESPACE:-"$REPOSITORY-preview-apps"}
-  VALUES_FILE="chart/values-preview-apps.yaml"
+  VALUES_FILE="$PREFIX_DIR/chart/values-preview-apps.yaml"
 
   # Use value from ENV or from user input.
   PREVIEW_APP_HOSTNAME=${PREVIEW_APP_HOSTNAME:-$PREVIEW_APP_ROUTE}
@@ -32,7 +32,7 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
     index=`expr $index + 1`
   done
   ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set appHost=$host "
-  
+
   # Reset env variable for post-deploy use.
   PREVIEW_APP_HOSTNAME=`echo $PREVIEW_APP_HOSTNAME | envsubst`
   echo "PREVIEW_APP_HOSTNAME=$PREVIEW_APP_HOSTNAME" >> $GITHUB_ENV
@@ -44,21 +44,21 @@ elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
   RELEASE_NAME="$REPOSITORY"
   NAMESPACE=${NAMESPACE:-"$REPOSITORY"}
-  VALUES_FILE="chart/values-staging.yaml"
-  CHART_FILE="chart/"
+  VALUES_FILE="$PREFIX_DIR/chart/values-staging.yaml"
+  CHART_FILE="$PREFIX_DIR/chart/"
 
 elif [[ "$IMAGE_TAG" == "homologation" ]]; then
   # Release type: Homologation
   RELEASE_NAME="$REPOSITORY"
   NAMESPACE=${NAMESPACE:-"$REPOSITORY-homologation"}
-  VALUES_FILE="chart/values-homologation.yaml"
-  CHART_FILE="chart/"
+  VALUES_FILE="$PREFIX_DIR/chart/values-homologation.yaml"
+  CHART_FILE="$PREFIX_DIR/chart/"
 
 else
   # Release type: Production
   RELEASE_NAME="$REPOSITORY"
   NAMESPACE=${NAMESPACE:-"$REPOSITORY"}
-  VALUES_FILE="chart/values-production.yaml"
+  VALUES_FILE="$PREFIX_DIR/chart/values-production.yaml"
 fi
 
 COMMON_ARGS="--install --create-namespace --atomic --cleanup-on-fail --debug"
