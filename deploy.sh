@@ -4,75 +4,80 @@ set -e
 echo "Logging to EKS..."
 aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 
-SECRETS_LIST=""
-ROUTE_OVERRIDE=""
+# If the repository is a monorepo the envvar `$REPOSITORY` is the application subdir
+sub_dir="./"
+if [[ ! "${GITHUB_REPOSITORY#betrybe\/}" == "$REPOSITORY" ]]; then
+  sub_dir="$REPOSITORY"
+fi
 
 # Preparing the secret variables defined using the prefix "SECRET_".
-SECRETS=$(env | awk -F = '/^SECRET_/ {print $1}')
-for data in ${SECRETS}
+secrets=$(env | awk -F = '/^SECRET_/ {print $1}')
+secrets_list=""
+for data in ${secrets}
 do
   NAME=$(echo $data | sed 's/'^SECRET_'//g')
-  SECRETS_LIST="$SECRETS_LIST --set secrets.$NAME=\"\${$data}\""
+  secrets_list="$secrets_list --set secrets.$NAME=\"\${$data}\""
 done
 
-# Defining fields according to their release type.
-if [[ "$IMAGE_TAG" == preview-app-* ]]; then
-  # Release type: Preview Apps
-  RELEASE_NAME="$REPOSITORY-$VERSION"
-  NAMESPACE=${NAMESPACE:-"$REPOSITORY-preview-apps"}
-  VALUES_FILE="chart/values-preview-apps.yaml"
-
-  # Use value from ENV or from user input.
-  PREVIEW_APP_HOSTNAME=${PREVIEW_APP_HOSTNAME:-$PREVIEW_APP_ROUTE}
+route_override=""
+# Use value from ENV or from user input.
+PREVIEW_APP_HOSTNAME=${PREVIEW_APP_HOSTNAME:-$PREVIEW_APP_ROUTE}
+override_preview_app_route () {
   index=0
   for route in ${PREVIEW_APP_HOSTNAME}
   do
     host=`echo $route | envsubst` # Resolve environment variables on string
-    ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set ingressRoute.routes[$index].match=\"Host(\\\`$host\\\`)\" "
+    route_override="$route_override --set ingressRoute.routes[$index].match=\"Host(\\\`$host\\\`)\" "
     index=`expr $index + 1`
   done
-  ROUTE_OVERRIDE="$ROUTE_OVERRIDE --set appHost=$host "
-  
+  route_override="$route_override --set appHost=$host "
+}
+
+CHART_FILE=${CHART_FILE:-"$sub_dir/chart/"}
+release_name="$REPOSITORY"
+namespace=${NAMESPACE:-$REPOSITORY}
+values_file="$sub_dir/chart/values.yaml"
+# Defining fields according to their release type.
+if [[ "$IMAGE_TAG" == preview-app-* ]]; then
+  # Release type: Preview Apps
+  release_name="$REPOSITORY-$VERSION"
+  namespace=${NAMESPACE:-"$REPOSITORY-preview-apps"}
+  values_file="$sub_dir/chart/values-preview-apps.yaml"
+
+  override_preview_app_route
+
   # Reset env variable for post-deploy use.
   PREVIEW_APP_HOSTNAME=`echo $PREVIEW_APP_HOSTNAME | envsubst`
   echo "PREVIEW_APP_HOSTNAME=$PREVIEW_APP_HOSTNAME" >> $GITHUB_ENV
 
   # Cleanup any preview-app in progress
-  helm uninstall $RELEASE_NAME --wait --namespace $NAMESPACE || true
+  helm uninstall $release_name --wait --namespace $namespace || true
 
 elif [[ "$IMAGE_TAG" == "staging" ]]; then
   # Release type: Staging
-  RELEASE_NAME="$REPOSITORY"
-  NAMESPACE=${NAMESPACE:-"$REPOSITORY"}
-  VALUES_FILE="chart/values-staging.yaml"
-  CHART_FILE="chart/"
+  values_file="$sub_dir/chart/values-staging.yaml"
 
 elif [[ "$IMAGE_TAG" == "homologation" ]]; then
   # Release type: Homologation
-  RELEASE_NAME="$REPOSITORY"
-  NAMESPACE=${NAMESPACE:-"$REPOSITORY-homologation"}
-  VALUES_FILE="chart/values-homologation.yaml"
-  CHART_FILE="chart/"
+  namespace=${NAMESPACE:-"$REPOSITORY-homologation"}
+  values_file="$sub_dir/chart/values-homologation.yaml"
 
 else
   # Release type: Production
-  RELEASE_NAME="$REPOSITORY"
-  NAMESPACE=${NAMESPACE:-"$REPOSITORY"}
-  VALUES_FILE="chart/values-production.yaml"
+  values_file="$sub_dir/chart/values-production.yaml"
 fi
 
-COMMON_ARGS="--install --create-namespace --atomic --cleanup-on-fail --debug"
-
+common_args="--install --create-namespace --atomic --cleanup-on-fail --debug"
 echo "Starting deploy..."
 bash -c "\
-    helm upgrade $RELEASE_NAME $CHART_FILE \
-    $COMMON_ARGS                           \
-    --namespace $NAMESPACE                 \
+    helm upgrade $release_name $CHART_FILE \
+    $common_args                           \
+    --namespace $namespace                 \
     --timeout $TIMEOUT                     \
-    --values $VALUES_FILE                  \
+    --values $values_file                  \
     --set image.repository=$REPOSITORY_URI \
     --set image.tag=$IMAGE_TAG             \
-    $ROUTE_OVERRIDE                        \
-    $SECRETS_LIST                          \
+    $route_override                        \
+    $secrets_list                          \
 "
 echo "Success!"
