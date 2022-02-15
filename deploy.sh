@@ -7,7 +7,9 @@ aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 # If the repository is a monorepo the envvar `$REPOSITORY` is the application subdir
 sub_dir="./"
 if [[ ! "${GITHUB_REPOSITORY#betrybe\/}" == "$REPOSITORY" ]]; then
+if [[ -z "$SKIP_CHECK" ]]; then
   sub_dir="$REPOSITORY"
+fi
 fi
 
 # Preparing the secret variables defined using the prefix "SECRET_".
