@@ -1,16 +1,15 @@
 #!/bin/bash
 set -e
 
-echo "Logging to EKS..."
-aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
-
-# If the repository is a monorepo the envvar `$REPOSITORY` is the application subdir
+# If the repository is a monorepo then the envvar `$PIPELINE_MODE` must
+# be set to "monorepo" in order to the pipeline work properly.
 sub_dir="./"
-if [[ ! "${GITHUB_REPOSITORY#betrybe\/}" == "$REPOSITORY" ]]; then
-if [[ -z "$SKIP_CHECK" ]]; then
+if [[ "$PIPELINE_MODE" == "monorepo" ]]; then
   sub_dir="$REPOSITORY"
 fi
-fi
+
+echo "Logging to EKS..."
+aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 
 # Preparing the secret variables defined using the prefix "SECRET_".
 secrets=$(env | awk -F = '/^SECRET_/ {print $1}')
