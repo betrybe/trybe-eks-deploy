@@ -5,7 +5,7 @@ set -e
 # be set to "monorepo" in order to the pipeline work properly.
 sub_dir="./"
 if [[ "$PIPELINE_MODE" == "monorepo" ]]; then
-  sub_dir="$REPOSITORY"
+  sub_dir="$REPOSITORY_PATH$REPOSITORY"
 fi
 
 echo "Logging to EKS..."
