@@ -11,6 +11,15 @@ fi
 echo "Logging to EKS..."
 aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER
 
+# Preparing the custom variables defined using the prefix "VALUES_".
+custom_values=$(env | awk -F = '/^VALUES_/ {print $1}')
+custom_values_list=""
+for data in ${custom_values}
+do
+  NAME=$(echo $data | sed 's/'^VALUES_'//g')
+  custom_values_list="$custom_values_list --set $NAME=\"\${$data}\""
+done
+
 # Preparing the secret variables defined using the prefix "SECRET_".
 secrets=$(env | awk -F = '/^SECRET_/ {print $1}')
 secrets_list=""
@@ -79,6 +88,7 @@ bash -c "\
     --set image.repository=$REPOSITORY_URI \
     --set image.tag=$IMAGE_TAG             \
     $route_override                        \
+    $custom_values_list                    \
     $secrets_list                          \
 "
 echo "Success!"
