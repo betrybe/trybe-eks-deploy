@@ -48,7 +48,7 @@ release_name="$REPOSITORY"
 namespace=${NAMESPACE:-$REPOSITORY}
 values_file="$sub_dir/chart/values.yaml"
 # Defining fields according to their release type.
-if [[ "$IMAGE_TAG" == preview-app-* ]]; then
+if [[ "$ENVIRONMENT" == "preview-app" ]]; then
   # Release type: Preview Apps
   release_name="$REPOSITORY-$VERSION"
   namespace=${NAMESPACE:-"$REPOSITORY-preview-apps"}
@@ -63,11 +63,11 @@ if [[ "$IMAGE_TAG" == preview-app-* ]]; then
   # Cleanup any preview-app in progress
   helm uninstall $release_name --wait --namespace $namespace || true
 
-elif [[ "$IMAGE_TAG" == "staging" ]]; then
+elif [[ "$ENVIRONMENT" == "staging" ]]; then
   # Release type: Staging
   values_file="$sub_dir/chart/values-staging.yaml"
 
-elif [[ "$IMAGE_TAG" == "homologation" ]]; then
+elif [[ "$ENVIRONMENT" == "homologation" ]]; then
   # Release type: Homologation
   namespace=${NAMESPACE:-"$REPOSITORY-homologation"}
   values_file="$sub_dir/chart/values-homologation.yaml"
@@ -76,6 +76,8 @@ else
   # Release type: Production
   values_file="$sub_dir/chart/values-production.yaml"
 fi
+
+echo "Values file: $values_file"
 
 common_args="--install --create-namespace --atomic --cleanup-on-fail --debug"
 echo "Starting deploy..."
