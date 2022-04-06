@@ -3,7 +3,7 @@ set -e
 
 # If the repository is a monorepo then the envvar `$PIPELINE_MODE` must
 # be set to "monorepo" in order to the pipeline work properly.
-sub_dir="./"
+sub_dir="."
 if [[ "$PIPELINE_MODE" == "monorepo" ]]; then
   sub_dir="$REPOSITORY_PATH$REPOSITORY"
 fi
