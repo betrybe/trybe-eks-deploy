@@ -69,7 +69,7 @@ elif [[ "$ENVIRONMENT" == "staging" ]]; then
 
 elif [[ "$ENVIRONMENT" == "homologation" ]]; then
   # Release type: Homologation
-  namespace=${NAMESPACE:-"$REPOSITORY-homologation"}
+  namespace=${NAMESPACE:-"$REPOSITORY"}
   values_file="$sub_dir/chart/values-homologation.yaml"
 
 else
