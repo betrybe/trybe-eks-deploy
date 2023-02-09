@@ -46,13 +46,13 @@ override_preview_app_route () {
 CHART_FILE=${CHART_FILE:-"$sub_dir/chart/"}
 release_name="$REPOSITORY"
 namespace=${NAMESPACE:-$REPOSITORY}
-values_file="$sub_dir/chart/values.yaml"
+values_file="values.yaml"
 # Defining fields according to their release type.
 if [[ "$ENVIRONMENT" == "preview-app" ]]; then
   # Release type: Preview Apps
   release_name="$REPOSITORY-$VERSION"
   namespace=${NAMESPACE:-"$REPOSITORY-preview-apps"}
-  values_file="$sub_dir/chart/values-preview-apps.yaml"
+  values_file="values-preview-apps.yaml"
 
   override_preview_app_route
 
@@ -65,19 +65,33 @@ if [[ "$ENVIRONMENT" == "preview-app" ]]; then
 
 elif [[ "$ENVIRONMENT" == "staging" ]]; then
   # Release type: Staging
-  values_file="$sub_dir/chart/values-staging.yaml"
+  values_file="values-staging.yaml"
 
 elif [[ "$ENVIRONMENT" == "homologation" ]]; then
   # Release type: Homologation
   namespace=${NAMESPACE:-"$REPOSITORY"}
-  values_file="$sub_dir/chart/values-homologation.yaml"
+  values_file="values-homologation.yaml"
 
 else
   # Release type: Production
-  values_file="$sub_dir/chart/values-production.yaml"
+  values_file="values-production.yaml"
 fi
 
 echo "Values file: $values_file"
+
+values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/values.yaml")
+if [[ "$values_file_content" == *"404: Not Found"* ]]; then
+  echo "values.yaml não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
+  exit 1
+fi
+echo "$values_file_content" > "$sub_dir/chart/values.yaml"
+
+values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/$values_file")
+if [[ "$values_file_content" == *"404: Not Found"* ]]; then
+  echo "$values_file não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
+  exit 1
+fi
+echo "$values_file_content" > "$sub_dir/chart/$values_file"
 
 common_args="--install --create-namespace --atomic --cleanup-on-fail --debug"
 echo "Starting deploy..."
@@ -86,7 +100,7 @@ bash -c "\
     $common_args                           \
     --namespace $namespace                 \
     --timeout $TIMEOUT                     \
-    --values $values_file                  \
+    --values $sub_dir/chart/$values_file   \
     --set image.repository=$REPOSITORY_URI \
     --set image.tag=$IMAGE_TAG             \
     $route_override                        \
