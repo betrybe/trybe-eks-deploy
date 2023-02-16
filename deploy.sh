@@ -77,21 +77,26 @@ else
   values_file="values-production.yaml"
 fi
 
-echo "Values file: $values_file"
+if [[ "$REPOSITORY" == "sorry-cypress" ]] || [[ "$REPOSITORY" == "projects-service" ]]
+then
+  echo "Values file: $sub_dir/chart/$values_file"
+else
+  echo "Values file: $values_file"
 
-values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/values.yaml")
-if [[ "$values_file_content" == *"404: Not Found"* ]]; then
-  echo "values.yaml não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
-  exit 1
-fi
-echo "$values_file_content" > "$sub_dir/chart/values.yaml"
+  values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/values.yaml")
+  if [[ "$values_file_content" == *"404: Not Found"* ]]; then
+    echo "values.yaml não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
+    exit 1
+  fi
+  echo "$values_file_content" > "$sub_dir/chart/values.yaml"
 
-values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/$values_file")
-if [[ "$values_file_content" == *"404: Not Found"* ]]; then
-  echo "$values_file não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
-  exit 1
+  values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/$values_file")
+  if [[ "$values_file_content" == *"404: Not Found"* ]]; then
+    echo "$values_file não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
+    exit 1
+  fi
+  echo "$values_file_content" > "$sub_dir/chart/$values_file"
 fi
-echo "$values_file_content" > "$sub_dir/chart/$values_file"
 
 common_args="--install --create-namespace --atomic --cleanup-on-fail --debug"
 echo "Starting deploy..."
