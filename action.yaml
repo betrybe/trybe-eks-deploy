@@ -26,5 +26,7 @@ runs:
       env:
         EKS_CLUSTER: ${{ inputs.clusterName }}
         AWS_REGION: ${{ inputs.awsRegion }}
+        ARGOCD_SERVER: deploy.betrybe.com:443
+        ARGOCD_VERSION: v2.6.2
         TIMEOUT: ${{ inputs.timeout }}
         PREVIEW_APP_ROUTE: ${{ inputs.previewAppRoute }}

@@ -77,39 +77,49 @@ else
   values_file="values-production.yaml"
 fi
 
-if [[ "$REPOSITORY" == "sorry-cypress" ]] || [[ "$REPOSITORY" == "projects-service" ]]
-then
-  echo "Values file: $sub_dir/chart/$values_file"
-else
-  echo "Values file: $values_file"
+# is_in_argocd=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/argocd-app-updater/main/.argo_cd_projects" | grep $REPOSITORY)
+# if [[ ! -z "$is_in_argocd" ]]; then
+#   argocd_script=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/values.yaml")
+#   echo "$values_file_content" > ./update_params.sh
 
-  values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/values.yaml")
-  if [[ "$values_file_content" == *"404: Not Found"* ]]; then
-    echo "values.yaml não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
-    exit 1
+#   export ARGOCD_AUTH_TOKEN=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/argo-app-credential/main/.token")
+
+#   ./update_params.sh
+# else
+  if [[ "$REPOSITORY" == "sorry-cypress" ]] || [[ "$REPOSITORY" == "projects-service" ]]
+  then
+    echo "Values file: $sub_dir/chart/$values_file"
+  else
+    echo "Values file: $values_file"
+
+    values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/values.yaml")
+    if [[ "$values_file_content" == *"404: Not Found"* ]]; then
+      echo "values.yaml não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
+      exit 1
+    fi
+    echo "$values_file_content" > "$sub_dir/chart/values.yaml"
+
+    values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/$values_file")
+    if [[ "$values_file_content" == *"404: Not Found"* ]]; then
+      echo "$values_file não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
+      exit 1
+    fi
+    echo "$values_file_content" > "$sub_dir/chart/$values_file"
   fi
-  echo "$values_file_content" > "$sub_dir/chart/values.yaml"
 
-  values_file_content=$(curl -s "https://x-access-token:$BOOTSTRAP_TOKEN@raw.githubusercontent.com/betrybe/infrastructure-projects/main/$REPOSITORY/$values_file")
-  if [[ "$values_file_content" == *"404: Not Found"* ]]; then
-    echo "$values_file não foi encontrado no em https://github.com/betrybe/infrastructure-projects/tree/main/$REPOSITORY"
-    exit 1
-  fi
-  echo "$values_file_content" > "$sub_dir/chart/$values_file"
-fi
-
-common_args="--install --create-namespace --atomic --cleanup-on-fail --debug"
-echo "Starting deploy..."
-bash -c "\
-    helm upgrade $release_name $CHART_FILE \
-    $common_args                           \
-    --namespace $namespace                 \
-    --timeout $TIMEOUT                     \
-    --values $sub_dir/chart/$values_file   \
-    --set image.repository=$REPOSITORY_URI \
-    --set image.tag=$IMAGE_TAG             \
-    $route_override                        \
-    $custom_values_list                    \
-    $secrets_list                          \
-"
-echo "Success!"
+  common_args="--install --create-namespace --atomic --cleanup-on-fail --debug"
+  echo "Starting deploy..."
+  bash -c "\
+      helm upgrade $release_name $CHART_FILE \
+      $common_args                           \
+      --namespace $namespace                 \
+      --timeout $TIMEOUT                     \
+      --values $sub_dir/chart/$values_file   \
+      --set image.repository=$REPOSITORY_URI \
+      --set image.tag=$IMAGE_TAG             \
+      $route_override                        \
+      $custom_values_list                    \
+      $secrets_list                          \
+  "
+  echo "Success!"
+# fi
